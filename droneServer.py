@@ -2,6 +2,7 @@ import sys
 from grpc import aio
 import asyncio
 import logging
+import math
 import DroneService_pb2
 import DroneService_pb2_grpc
 from pymavlink import mavutil
@@ -118,7 +119,7 @@ class DroneService(DroneService_pb2_grpc.DroneServiceServicer):
         mission_count = missionCount.count
         if (mission_count > 0):
             mission_count = mission_count - 1
-
+            
         self.detailed_data = DroneService_pb2.DetailedData(
             voltageBattery=systemStatus.voltage_battery/1000,
             batteryRemaining=systemStatus.battery_remaining,
@@ -127,13 +128,13 @@ class DroneService(DroneService_pb2_grpc.DroneServiceServicer):
             absoluteAltitude=position.alt/1000,
             relativeAltitude=position.relative_alt/1000,
             heading=position.hdg/100,
-            roll=attitude.roll,
-            pitch=attitude.pitch,
+            roll=math.degrees(attitude.roll),
+            pitch=math.degrees(attitude.pitch),
             yaw=attitude.yaw,
             currentMission=missionCurrent.seq,
             missionCount=mission_count,
         )
-                
+    
     async def SendStartMission(self, request, context):
         master.mav.command_long_send(master.target_system, master.target_component,
                              mavutil.mavlink.MAV_CMD_MISSION_START, 0, 1, self.detailed_data.missionCount, 0, 0, 0, 0, 0)
@@ -153,23 +154,23 @@ async def server_start(port):
     print("Сервер запущен. Порт: {0}.".format(port))
     await server.wait_for_termination()
 
-SERIAL_PORT = 'COM3'
+SERIAL_PORT = '/dev/ttyAMA0'
 BAUDRATE = 57600
 #Альтернативный вариант подключения через интернет:
 host = 'localhost'
-port = sys.argv[1]
-out_port = int(sys.argv[2])
+#port = sys.argv[1]
+#out_port = int(sys.argv[2])
 #port = 5760
-#out_port = 1604
+out_port = 1604
 
-master = mavutil.mavlink_connection('tcp:{0}:{1}'.format(host, port))
+#master = mavutil.mavlink_connection('tcp:{0}:{1}'.format(host, port))
 
 print("Подключение к полётному контроллеру...")
-#master = mavutil.mavlink_connection(SERIAL_PORT, baud=BAUDRATE)
+master = mavutil.mavlink_connection(SERIAL_PORT, baud=BAUDRATE)
 master.wait_heartbeat()
 
 print("Подключение установлено!")
-master.mav.request_data_stream_send(master.target_system, master.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 10, 1)
+master.mav.request_data_stream_send(master.target_system, master.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 5, 1)
 print("Запускаю сервер...")
 logging.basicConfig(level=logging.INFO)
 
