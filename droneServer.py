@@ -170,7 +170,7 @@ master = mavutil.mavlink_connection(SERIAL_PORT, baud=BAUDRATE)
 master.wait_heartbeat()
 
 print("Подключение установлено!")
-master.mav.request_data_stream_send(master.target_system, master.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 5, 1)
+master.mav.request_data_stream_send(master.target_system, master.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 2, 1)
 print("Запускаю сервер...")
 logging.basicConfig(level=logging.INFO)
 
