@@ -248,23 +248,23 @@ async def server_start(port):
 
 
 DEFAULT_SETTINGS_FILE = "drone_settings.bin"
-#SERIAL_PORT = 'COM3'
-#BAUDRATE = 57600
+SERIAL_PORT = 'COM3'
+BAUDRATE = 57600
 #Альтернативный вариант подключения через интернет:
-host = 'localhost'
+#host = '192.168.1.54'
 #port = '1450'
-port = sys.argv[1]
-out_port = int(sys.argv[2])
+#port = sys.argv[1]
+#out_port = int(sys.argv[2])
 if len(sys.argv) >= 4:
     DEFAULT_SETTINGS_FILE = sys.argv[3]
 
 #port = 5760
-#out_port = 1604
+out_port = 1604
 
-master = mavutil.mavlink_connection('tcp:{0}:{1}'.format(host, port))
+#master = mavutil.mavlink_connection('udp:{0}:{1}'.format(host, port))
 
 print("Подключение к полётному контроллеру...")
-#master = mavutil.mavlink_connection(SERIAL_PORT, baud=BAUDRATE)
+master = mavutil.mavlink_connection(SERIAL_PORT, baud=BAUDRATE)
 master.wait_heartbeat()
 
 print("Подключение установлено!")
